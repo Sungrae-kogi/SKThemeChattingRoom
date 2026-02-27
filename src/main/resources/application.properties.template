@@ -1,0 +1,25 @@
+# ========================================
+# [사용 방법]
+# 1. 이 파일을 복사합니다.
+# 2. 파일명을 application.properties 로 바꿉니다.
+# 3. 아래 빈칸을 본인 환경에 맞게 채워주세요.
+# ========================================
+spring.application.name=chattingRoom
+
+spring.mvc.view.prefix=/WEB-INF/views/
+spring.mvc.view.suffix=.jsp
+
+server.servlet.jsp.init-parameters.development=true
+
+# 정적 자원 버전 관리 활성화
+spring.web.resources.chain.strategy.content.enabled=true
+spring.web.resources.chain.strategy.content.paths=/**
+
+# MariaDB 연결 정보
+spring.datasource.driver-class-name=org.mariadb.jdbc.Driver
+spring.datasource.url=jdbc:mariadb://localhost:3306/dbeaver
+spring.datasource.username=
+spring.datasource.password=
+
+# MyBatis 설정 (XML 파일 위치 지정)
+mybatis.mapper-locations=classpath:mapper/**/*.xml

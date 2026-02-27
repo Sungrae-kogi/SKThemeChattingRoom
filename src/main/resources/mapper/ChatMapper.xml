@@ -1,0 +1,24 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.chattingroom.mapper.ChatMapper">
+
+    <insert id="insertMessage">
+        INSERT INTO CHAT_MESSAGE
+            (sender, content)
+        VALUES
+            (#{sender}, #{content})
+    </insert>
+
+    <select id="selectRecentMessages" resultType="com.example.chattingroom.dto.MessageDTO">
+        SELECT sender, content, send_time AS snedTime
+        FROM (
+            SELECT sender, content, send_time
+            FROM CHAT_MESSAGE
+            ORDER BY send_time DESC
+            LIMIT 50
+             ) AS sub
+        ORDER BY send_time ASC
+    </select>
+</mapper>
