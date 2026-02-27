@@ -1,0 +1,55 @@
+package com.example.chattingroom.mapper;
+
+import com.example.chattingroom.dto.MessageDTO;
+import org.junit.jupiter.api.DisplayName;
+import org.junit.jupiter.api.Test;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+/*
+    SpringBootTest는 통합 테스트 환경 -> SpringBoot와 DB를 통째료 실행하므로 테스트에 시간이 소요.
+
+    단위 테스트는 ChatService 라는 자바 파일 하나만 떼어내 빠른 시간에 검증.
+    ChatService의 검증에는 @AutoWired로 주입받는 ChatMapper가 반드시 필요한데 이건 DB와 연관되어있다.
+    이것을 Mockito 라이브러리가 가짜(Mock) 객체를 만들어서 연기를 시키게 함.
+
+ */
+
+@SpringBootTest
+@Transactional
+public class ChatMapperTest {
+
+    @Autowired
+    private ChatMapper chatMapper;
+
+    @Test
+    @DisplayName("DB에 채팅을 넣고 조회하면 정상적으로 나와야 한다.")
+    void insertAndSelectTest(){
+
+        // Given
+        String testSender = "테스트봇";
+        String testContent = "이것은 자동화 테스트입니다.";
+
+        // When
+        chatMapper.insertMessage(testSender,testContent);
+
+        List<MessageDTO> recentList = chatMapper.selectRecentMessages();
+
+        // Then
+        // 리스트가 비어있지 않아야 함을 보장해야한다.
+        assertThat(recentList).isNotEmpty();
+
+        // 작성한 쿼리는 시간순(ASC)이므로 방금 넣은 최신 채팅은 리스트의 맨 마지막에 존재해야만 합니다.
+        MessageDTO lastMsg = recentList.get(recentList.size()-1);
+
+        // lastMsg의 작성자와, 내용이 마지막으로 전송한 채팅과 일치해야만 합니다.
+        assertThat(lastMsg.getSender()).isEqualTo(testSender);
+        assertThat(lastMsg.getContent()).isEqualTo(testContent);
+
+    }
+}
