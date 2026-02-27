@@ -40,46 +40,37 @@ function connectWebSocket() {
                 .innerText = "접속자: " + userStr;
 
         } else {
-            // 2. 일반 채팅일 경우 콜론(:) 위치 찾기
-            let idx = data.indexOf(":");
+            // 전달받은 JSON 텍스트를 JS 객체로 변환.
+            let msgObj = JSON.parse(data);
 
-            if (idx > -1) {
-                // 이름과 내용 분리
-                let sender = data.substring(0, idx).trim();
-                let content = data.substring(idx + 1).trim();
+            let sender = msgObj.sender;
+            let content = msgObj.content;
 
-                let timeStr = getFormatTime();
+            // 기존 getFormatTime() 대신 서버에서 가져온 시간
+            let timeStr = msgObj.sendTime;
 
-                // 내가 보낸 메시지라면? (우측 정렬)
-                if (sender === username) {
-                    box.innerHTML +=
-                        "<div class='msg-row msg-me'>" +
-                        "<span class='msg-time'>"+
-                        timeStr + "</span>" +
-                        "<div class='msg-bubble'>" +
-                        content +
-                        "</div></div>";
-
-                    // 남이 보낸 메시지라면? (좌측 정렬 + 이름 표시)
-                } else {
-                    box.innerHTML +=
-                        "<div class='msg-sender'>" +
-                        sender +
-                        "</div>" +
-                        "<div class='msg-row msg-other'>" +
-                        "<div class='msg-bubble'>" + content + "</div>" +
-                        "<span class='msg-time'>" +
-                        timeStr + "</span>" +
-                        "</div>";
-                }
-
-            } else {
-                // 콜론이 없는 시스템 메시지 처리
+            // 내가 보낸 메시지라면? (우측 정렬)
+            if (sender === username) {
                 box.innerHTML +=
-                    "<p style='text-align:center; color:#999;'>" +
-                    data + "</p>";
-            }
+                    "<div class='msg-row msg-me'>" +
+                    "<span class='msg-time'>" +
+                    timeStr + "</span>" +
+                    "<div class='msg-bubble'>" +
+                    content +
+                    "</div></div>";
 
+                // 남이 보낸 메시지라면? (좌측 정렬 + 이름 표시)
+            } else {
+                box.innerHTML +=
+                    "<div class='msg-sender'>" +
+                    sender +
+                    "</div>" +
+                    "<div class='msg-row msg-other'>" +
+                    "<div class='msg-bubble'>" + content + "</div>" +
+                    "<span class='msg-time'>" +
+                    timeStr + "</span>" +
+                    "</div>";
+            }
             // 3. 메시지 추가 후 스크롤을 맨 아래로 내리기
             box.scrollTop = box.scrollHeight;
         }
@@ -110,15 +101,20 @@ function sendMsg() {
         return;
     }
 
-    ws.send(username + ": " + text);
-    lastSendTime = now;
+    // 데이터 전송시에도 JS객체를 JSON 텍스트로 포장
+    let sendData = {
+        sender: username,
+        content: text,
+    }
+
+    ws.send(JSON.stringify(sendData));
     input.value = "";
 }
 
 // 메시지 전송시 표기할 시간 추출
-function getFormatTime(){
+function getFormatTime() {
     let now = new Date();
-    let ampm = now.getHours() < 12? "오전" : "오후";
+    let ampm = now.getHours() < 12 ? "오전" : "오후";
     let h = now.getHours() % 12 || 12;
     let m = now.getMinutes();
 

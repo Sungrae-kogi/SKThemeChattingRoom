@@ -12,7 +12,7 @@
     </insert>
 
     <select id="selectRecentMessages" resultType="com.example.chattingroom.dto.MessageDTO">
-        SELECT sender, content, send_time AS snedTime
+        SELECT sender, content, send_time AS send_time
         FROM (
             SELECT sender, content, send_time
             FROM CHAT_MESSAGE
