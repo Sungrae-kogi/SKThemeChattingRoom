@@ -5,7 +5,12 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.test.context.DynamicPropertyRegistry;
+import org.springframework.test.context.DynamicPropertySource;
 import org.springframework.transaction.annotation.Transactional;
+import org.testcontainers.containers.MariaDBContainer;
+import org.testcontainers.junit.jupiter.Container;
+import org.testcontainers.junit.jupiter.Testcontainers;
 
 import java.util.List;
 
@@ -22,7 +27,29 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @SpringBootTest
 @Transactional
+@Testcontainers         // 도커 컨테이너 준비 선언
 public class ChatMapperTest {
+
+    /*
+        도커 세팅   - 도커에게 MariaDB 10.6 창고를 임시로 띄우라는 명령
+     */
+    @Container
+    static MariaDBContainer<?> mariadb = new MariaDBContainer<>("mariadb:10.11").withDatabaseName("testdb")
+            .withUsername("testuser")
+            .withPassword("testpass");
+
+    /*
+        도커 세팅   - 로컬 application.properties에 적힌 dB 주소를 무시하고, 방금 도커가 띄운 '가짜 DB 주소'로 연결을 바꿈
+     */
+    @DynamicPropertySource
+    static void overrideProps(DynamicPropertyRegistry registry){
+        registry.add("spring.datasource.url", mariadb::getJdbcUrl);
+        registry.add("spring.datasource.username", mariadb::getUsername);
+        registry.add("spring.datasource.password", mariadb::getPassword);
+
+        // 테스트 할 때 무조건 schema.sql을 실행해서 테이블을 만들어
+        registry.add("spring.sql.init.mode", () -> "always");
+    }
 
     @Autowired
     private ChatMapper chatMapper;
@@ -33,7 +60,7 @@ public class ChatMapperTest {
 
         // Given
         String testSender = "테스트봇";
-        String testContent = "이것은 자동화 테스트입니다.";
+        String testContent = "도커에서 실행 중입니다.";
 
         // When
         chatMapper.insertMessage(testSender,testContent);

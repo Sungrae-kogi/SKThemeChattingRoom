@@ -24,4 +24,5 @@ spring.datasource.password=여기에_비밀번호_입력
 # MyBatis 설정 (XML 파일 위치 지정)
 mybatis.mapper-locations=classpath:mapper/**/*.xml
 
+# 기본적으로는 off 상태 - 실제 dB를 건드리면 위험하기때문,
 spring.sql.init.mode=always
