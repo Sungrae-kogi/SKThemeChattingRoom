@@ -1,6 +1,6 @@
 # SK Theme Chatting Room 💬
-Spring Boot와 WebSocket을 활용한 실시간 익명 웹 채팅 서비스
-저작권이슈 없음.
+Spring Boot와 WebSocket을 활용한
+실시간 익명 웹 채팅 서비스 (저작권 이슈 없음)
 
 ## 📌 프로젝트 소개
 단일 채팅방에 접속한 여러 사용자가
@@ -12,15 +12,17 @@ Spring Boot와 WebSocket을 활용한 실시간 익명 웹 채팅 서비스
 - **Backend:** Java, Spring Boot, WebSocket, MyBatis
 - **Database:** MariaDB
 - **Frontend:** JSP, HTML/CSS, Vanilla JS
+- **Test & CI:** JUnit5, Mockito, AssertJ,
+  Testcontainers, GitHub Actions, Docker
 
-## ✨ 주요 기능
+## ✨ 주요 기능 및 아키텍처
 - **실시간 다중 통신:** WebSocket 기반 지연 없는 1:N 채팅
-- **접속자 동기화:** 입장/퇴장 시 상단 접속자 명단 실시간 갱신
-- **직관적인 UI:** 내 메시지(우측)와 타인 메시지(좌측) 분리 처리
 - **비동기 DB 저장:** `@Async`를 활용해
   메인 스레드 병목 없이 백그라운드에서 채팅 내역 영구 저장
-- **과거 내역 로드:** 방 입장 시 최근 대화 50건을
-  DB에서 조회하여 화면에 자동 출력
+- **CI 자동화 파이프라인:** GitHub Actions를 활용하여
+  메인 브랜치 Push 시 자동 빌드 및 통합 테스트 수행
+- **멱등성 있는 통합 테스트:** Testcontainers를 도입하여
+  로컬 DB 환경에 의존하지 않는 독립적인 테스트 환경(Docker) 구축
 
 ## 🚀 로컬 실행 방법
 
