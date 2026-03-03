@@ -1,0 +1,58 @@
+name: Spring Boot Test CI
+
+# Trigger 시점을 정해줌
+# main 또는 master 브랜치에 코드가 올라올 때마다 실행
+on:
+  push:
+    branches: ["main", "master"]
+
+
+# 알바생이 할 일 목록
+jobs:
+  build:
+    # 리눅스 컴퓨터를 하나 빌령ㅂ니다
+    runs-on: ubuntu-latest
+    # 해결 방법 : 가짜 MariaDB를 띄웁니다
+    services:
+      mariadb:
+        image: mariadb:10.6
+        env:
+          MYSQL_ROOT_PASSWORD: root
+          MYSQL_DATABASE: testdb
+        ports:
+          - 3306:3306
+        options: >
+          --health-cmd="mysqladmin ping" 
+          --health-interval=10s 
+          --health-timeout=5s 
+          --health-retries=3
+
+    # 순서대로 실행 할 작업(Steps)
+    steps:
+      - name: 1. 깃허브에 올라온 내 코드 다운받기
+        uses: actions/checkout@v3
+
+      - name: 2. 자바(JDK) 설치하기
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+
+      - name: 3. 숨겨둔 템플릿 파일을 진짜 설정 파일로 둔갑
+        run: |
+          cp src/main/resources/application.properties.template \
+          src/main/resources/application.properties
+          
+          sed -i 's/여기에_DB명_입력/testdb/g' \
+          src/main/resources/application.properties
+          
+          sed -i 's/여기에_계정명_입력/root/g' \
+          src/main/resources/application.properties
+          
+          sed -i 's/여기에_비밀번호_입력/root/g' \
+          src/main/resources/application.properties
+
+      - name: 4. Maven이 실행될 수 있도록 권한 주기 (맥/리눅스용)
+        run: chmod +x mvnw
+      - name: 5. 테스트 실행 !
+        run: ./mvnw clean test

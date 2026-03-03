@@ -27,7 +27,8 @@ class ChatServiceTest {
     @Mock
     private ChatMapper  chatMapper;
 
-    // 가짜 매퍼를 서비스 객체 안에 주입.
+    // 가짜 매퍼를 서비스 객체 안에 주입.     ChatService 에 ChatMapper가 필요해서
+    // InjectMocks가 진짜로 테스트할 타겟 본체 -> 이 어노테이션이 붙은 객체를 생성할 때, 위에서 만든 @Mock 가짜 부품들을 본체 안에 조립.
     @InjectMocks
     private ChatService chatService;
 
