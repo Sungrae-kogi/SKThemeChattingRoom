@@ -25,10 +25,74 @@ function startChat() {
     connectWebSocket();
 }
 
+// 이전 메시지의 날짜를 기억하고 있을 전역 변수
+let lastMessageDate = "";
+
+// 넘어온 메시지를 화면에 표기해주는 함수.
+function renderMessage(msgObj){
+
+    let box = document.getElementById("chatBox");
+
+    // 백엔드에서 넘어온 ISO 시간 데이터를 화면용으로 변환 ** 중요, 관심사의 분리로, 구현하면 해외의 인물과 연락할때 각 국가별로 시간을 프론트단에서 처리해서 표기하게됨.
+    let rawTime = msgObj.sendTime;
+    let dateObj = new Date(rawTime);
+
+    // 기존 getFormatTime() 대신 서버에서 가져온 시간    -> locales 인자로 전달한 값에 따라 표기법이바뀜. 프론트단에 역할 위임하기에 적합.
+    let currentDateStr = dateObj.toLocaleDateString('ko-KR');
+
+    // 새로운 메시지가 도착 -> 날짜가 바뀌었는가?
+    if(lastMessageDate !== currentDateStr){
+        let displayDate = dateObj.toLocaleDateString('ko-KR', {
+            month: 'long',
+            day: 'numeric'
+        });
+
+        box.innerHTML += "<div class='date-divider'>" + "<span>" + displayDate + "</span>" + "</div>";
+
+        lastMessageDate = currentDateStr;
+    }
+
+    // 날짜가 바뀐게 아니라면 -> 기존 시간 반환
+    let timeStr = dateObj.toLocaleTimeString('ko-KR', {
+        hour: 'numeric',
+        minute: '2-digit',
+        hour12: true
+    });
+
+    let sender = msgObj.sender;
+    let content = msgObj.content;
+
+    // 내가 보낸 메시지라면? (우측 정렬)
+    if (sender === username) {
+        box.innerHTML +=
+            "<div class='msg-row msg-me'>" +
+            "<span class='msg-time'>" +
+            timeStr + "</span>" +
+            "<div class='msg-bubble'>" +
+            content +
+            "</div></div>";
+
+        // 남이 보낸 메시지라면? (좌측 정렬 + 이름 표시)
+    } else {
+        box.innerHTML +=
+            "<div class='msg-sender'>" +
+            sender +
+            "</div>" +
+            "<div class='msg-row msg-other'>" +
+            "<div class='msg-bubble'>" + content + "</div>" +
+            "<span class='msg-time'>" +
+            timeStr + "</span>" +
+            "</div>";
+    }
+    // 3. 메시지 추가 후 스크롤을 맨 아래로 내리기
+    box.scrollTop = box.scrollHeight;
+}
 
 // 2. 서버의 "/chat" 주소로 웹소켓 연결
 function connectWebSocket() {
     ws = new WebSocket("ws://" + location.host + "/chat?name=" + encodeURIComponent(username));
+
+    // 모듈화 리펙토링 부분. onmessage 함수안에 대량의 로직이 들어간 상황.
     ws.onmessage = function (event) {
         let data = event.data;
         let box = document.getElementById("chatBox");
@@ -43,44 +107,8 @@ function connectWebSocket() {
             // 전달받은 JSON 텍스트를 JS 객체로 변환.
             let msgObj = JSON.parse(data);
 
-            let sender = msgObj.sender;
-            let content = msgObj.content;
-
-            // 백엔드에서 넘어온 ISO 시간 데이터를 화면용으로 변환 ** 중요, 관심사의 분리로, 구현하면 해외의 인물과 연락할때 각 국가별로 시간을 프론트단에서 처리해서 표기하게됨.
-            let rawTime = msgObj.sendTime;
-            let dateObj = new Date(rawTime);
-
-            // 기존 getFormatTime() 대신 서버에서 가져온 시간    -> locales 인자로 전달한 값에 따라 표기법이바뀜. 프론트단에 역할 위임하기에 적합.
-            let timeStr = dateObj.toLocaleTimeString('ko-KR', {
-                hour: 'numeric',
-                minute: '2-digit',
-                hour12: true
-            });
-
-            // 내가 보낸 메시지라면? (우측 정렬)
-            if (sender === username) {
-                box.innerHTML +=
-                    "<div class='msg-row msg-me'>" +
-                    "<span class='msg-time'>" +
-                    timeStr + "</span>" +
-                    "<div class='msg-bubble'>" +
-                    content +
-                    "</div></div>";
-
-                // 남이 보낸 메시지라면? (좌측 정렬 + 이름 표시)
-            } else {
-                box.innerHTML +=
-                    "<div class='msg-sender'>" +
-                    sender +
-                    "</div>" +
-                    "<div class='msg-row msg-other'>" +
-                    "<div class='msg-bubble'>" + content + "</div>" +
-                    "<span class='msg-time'>" +
-                    timeStr + "</span>" +
-                    "</div>";
-            }
-            // 3. 메시지 추가 후 스크롤을 맨 아래로 내리기
-            box.scrollTop = box.scrollHeight;
+            // 파이프라인 분리 : 모듈화
+            renderMessage(msgObj);
         }
     };
 }
