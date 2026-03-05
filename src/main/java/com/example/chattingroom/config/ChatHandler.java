@@ -2,10 +2,12 @@ package com.example.chattingroom.config;
 
 import com.example.chattingroom.dto.MessageDTO;
 import com.example.chattingroom.service.ChatService;
+import com.example.chattingroom.service.GeminiService;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.SerializationFeature;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
+import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,10 +24,12 @@ import java.util.Map;
 import java.util.concurrent.ConcurrentHashMap;
 
 @Component
+@RequiredArgsConstructor
 public class ChatHandler extends TextWebSocketHandler {
 
-    @Autowired
-    private ChatService chatService;
+    private final ChatService chatService;
+
+    private final GeminiService geminiService;
 
     // 1. 로그 기록용 로거
     private static final Logger log =
@@ -40,10 +44,6 @@ public class ChatHandler extends TextWebSocketHandler {
             .registerModule(new JavaTimeModule())
             .disable(SerializationFeature
                     .WRITE_DATES_AS_TIMESTAMPS);
-
-    public ChatHandler(ChatService chatService){
-        this.chatService = chatService;
-    }
 
     @Override
     public void afterConnectionEstablished(
@@ -71,7 +71,7 @@ public class ChatHandler extends TextWebSocketHandler {
         List<MessageDTO> history = chatService.getRecentMessages();
 
         // 새로 입장한 사람에게 이전 채팅히스토리 제공.
-        for(MessageDTO dto : history){
+        for (MessageDTO dto : history) {
             // 받아온 DTO를 JSON 문자열로 변환.
             String jsonStr = mapper.writeValueAsString(dto);
 
@@ -109,6 +109,56 @@ public class ChatHandler extends TextWebSocketHandler {
         String sender = node.get("sender").asText();
         String content = node.get("content").asText();
 
+        /**
+         *  AI 요약봇 개입 (가로채기 & 유니캐스트)
+         */
+        if ("!요약".equals(content.trim())) {
+            log.info("[AI 요약 요청] 세션: {}", session.getId());
+
+            // DB에서 최근 대화 내역 가져와서 하나의 문자열로 합치기.
+            List<MessageDTO> history = chatService.getRecentMessages();
+            StringBuilder chatData = new StringBuilder();
+            for (MessageDTO msg : history) {
+                chatData.append(msg.getSender()).append(": ").append(msg.getContent()).append("\n");
+            }
+
+            // 비동기 요청 전홍 (subscribe로 백그라운드 위임)
+            geminiService.summarizeChat(chatData.toString())
+                    .subscribe(
+                            summary -> {
+                                // 성공 시 실행될 로직
+                                try {
+                                    MessageDTO botMsg = new MessageDTO();
+                                    botMsg.setSender("🤖 AI 요약봇");
+                                    botMsg.setContent(summary);
+                                    botMsg.setSendTime(LocalDateTime.now());
+
+                                    // 방 전체가 아닌, 요청을 했던 그 세션에만 귓속말
+                                    String botJson = mapper.writeValueAsString(botMsg);
+                                    session.sendMessage(new TextMessage(botJson));
+                                } catch (Exception e) {
+                                    log.error("AI 요청 응답 실패", e);
+                                }
+                            },
+                            error -> {// 에러 발생 시 실행 로직
+                                log.error("[Gemini API 에러 원인 추적]: ", error);
+                                try {
+                                    MessageDTO errMSg = new MessageDTO();
+                                    errMSg.setSender("🤖 AI 요약봇");
+                                    errMSg.setContent("요약 중 서버 오류가 발생했습니다.");
+                                    errMSg.setSendTime(LocalDateTime.now());
+
+                                    session.sendMessage(new TextMessage(mapper.writeValueAsString(errMSg)));
+                                } catch (Exception e) {
+                                    log.error("에러 메시지 전송 실패", e);
+                                }
+                            }
+                    );
+            // 요약 명령어는 다른 사람에게 보일 필요 없으므로, 전송을 보냈다면, 여기서 종료.
+            return;
+        }
+
+
         // 3. 백그라운드 스레드에 DB 저장 지시 (비동기)
         chatService.saveMessageAsync(sender, content);
 
@@ -129,7 +179,6 @@ public class ChatHandler extends TextWebSocketHandler {
         for (WebSocketSession s : sessionMap.keySet()) {
             s.sendMessage(new TextMessage(broadcastJson));
         }
-
 
 
     }
