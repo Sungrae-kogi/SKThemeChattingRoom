@@ -1,5 +1,7 @@
 package com.example.chattingroom.controller;
 
+import com.example.chattingroom.interfaces.ImageUploader;
+import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,30 +14,20 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/upload")
+@RequiredArgsConstructor
 public class FileUploadController {
 
     // 파일을 저장할 로컬 폴더 경로 설정 -> 실제 메신저의 파일전송은 FTP가 아닌 클라우드 서버에 이미지를 HTTP로 전송하고, URL에 그 주소를 보내서 받는사람쪽에서 그 이미지를 불러오게끔.
-    private final String uploadDir = System.getProperty("user.dir") + "/uploads/";
+    // 다형성을 위해 Interface 타입으로 선언 -> 생성자 호출은 지금은 LocalImageUploader 라고 Interface를 구현한 타입의 생성자를 호출하지만, 코드나 시스템이 확장된다면 다형성에 의해 ImageUploader를 구현한 다양한 타입의 클래스가 올 수 있을것.
+    private final ImageUploader uploader;
 
     @PostMapping("/image")
     public ResponseEntity<String> uploadImage(@RequestParam("file") MultipartFile file){
         try{
-            File dir = new File(uploadDir);
-            if(!dir.exists())
-                dir.mkdirs();
+            String imageUrl = uploader.upload(file);
 
-            // 이미지 원본 앞에 UUID를 붙여 충돌을 방지. A,B가 cat.png를 보내면 서버에서 덮어쓰기되어버리므로.
-            String originalName = file.getOriginalFilename();
-            String uniqueName = UUID.randomUUID().toString() + "_" + originalName;
-
-            // 서버의 HDD에 물리적으로 저장
-            File destination = new File(uploadDir + uniqueName);
-            file.transferTo(destination);
-
-            // 프론트엔드가 이 이미지를 띄울 수 있도록 가상의 접속 주소 (URL) 을 영수증처럼 반환.
-            String imageUrl = "/uploads/" + uniqueName;
             return ResponseEntity.ok(imageUrl);
-        }catch (Exception e){
+        } catch (Exception e){
             return ResponseEntity.internalServerError().body("파일 업로드 실패");
         }
     }

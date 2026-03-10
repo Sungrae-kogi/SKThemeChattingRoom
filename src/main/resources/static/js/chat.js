@@ -41,6 +41,7 @@ window.createMessageBubble = function(msgObj) {
         hour: 'numeric', minute: '2-digit', hour12: true
     });
 
+    // 메시지가 파일 업로드일 경우 -> 전처리
     let displayContent = msgObj.content;
     if (displayContent.startsWith("/uploads/")) {
         displayContent = "<img src='" + displayContent +
@@ -49,6 +50,8 @@ window.createMessageBubble = function(msgObj) {
 
     let wrapper = document.createElement("div");
 
+    // 메시지 블럭 HTML 태그작성
+    // ***** 관심사의 분리 가 필요, -> 데이터를 다루는 로직(JS)와 화면을 그리는 껍데기 (HTML)은 물리적으로 분리되어야 한다. ************     -> REACT, VUE가 나오게된것.
     if (msgObj.sender === username) {
         wrapper.className = "msg-wrapper-me";
         wrapper.innerHTML =
