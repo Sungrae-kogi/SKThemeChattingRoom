@@ -34,7 +34,7 @@ function startChat() {
 let lastMessageDate = "";
 
 // ★ 추가된 부분: 두 JS 파일이 공유할 말풍선 조립 공장
-window.createMessageBubble = function(msgObj) {
+window.createMessageBubble = function (msgObj) {
     let rawTime = msgObj.sendTime || Date.now();
     let dateObj = new Date(rawTime);
     let timeStr = dateObj.toLocaleTimeString('ko-KR', {
@@ -171,6 +171,8 @@ function getFormatTime() {
 }
 
 document.getElementById('imageInput').addEventListener('change', function () {
+    // input type="file" 태그에 onclick으로 파일을 넣으면 그 값은 files[] 라는 배열에 저장.
+    // multiple 이라는 속성이 태그에 주어지지 않는다면 무조건 1개의 값만 담고, 그거는 files[0]에 들어감.
     let file = this.files[0];
     if (!file) return;
 
@@ -179,7 +181,7 @@ document.getElementById('imageInput').addEventListener('change', function () {
 
     if (file.size > MAX_SIZE) {
         alert("파일 용량은 5MB를 초과할 수 없습니다.");
-        this.value=''; //입력창 초기화
+        this.value = ''; //입력창 초기화
         return; // 함수를 즉시 종료, 서버 전송 x
     }
 

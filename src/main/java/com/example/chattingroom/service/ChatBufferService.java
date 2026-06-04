@@ -16,10 +16,10 @@ public class ChatBufferService {
     private static final String BUFFER_KEY = "chat:buffer";
 
     // 채팅을 치면 해당 함수가 호출
-    public void saveToBuffer(MessageDTO message){
-        // Redis의 List 구조
+    public void saveToBuffer(MessageDTO message) {
+        // Redis의 List 구조 -> redisTemplate의 opsForList() 순서가 있는 연결리스트 구조
         redisTemplate.opsForList().rightPush(BUFFER_KEY, message);
 
-        log.info("Redis 임시 보관 완료 : "+ message.getContent());
+        log.info("Redis 임시 보관 완료 : " + message.getContent());
     }
 }

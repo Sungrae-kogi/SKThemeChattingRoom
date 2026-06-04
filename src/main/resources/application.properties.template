@@ -40,3 +40,5 @@ spring.servlet.multipart.max-file-size = 30MB
 
 # 2. 요청 한 번에 보낼 수 있는 총 크기 (30MB)
 spring.servlet.multipart.max-request-size= 30MB
+
+logging.file.path = ./logs

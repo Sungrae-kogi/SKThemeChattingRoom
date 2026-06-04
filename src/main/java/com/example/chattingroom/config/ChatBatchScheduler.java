@@ -26,26 +26,26 @@ public class ChatBatchScheduler {
     // 20초 마다 실행
     @Scheduled(fixedDelay = 20000)
     @Transactional
-    public void processChatBuffer(){
+    public void processChatBuffer() {
         // 버퍼의 채팅 수를 확인
         Long size = redisTemplate.opsForList().size(BUFFER_KEY);
 
         // 비어있다면, 할일이없으니 종료.
-        if(size == null || size == 0)
+        if (size == null || size == 0)
             return;
 
         List<MessageDTO> batchList = new ArrayList<>();
 
         // 쌓인 메시지를 Redis에서 Pop 해와서 리스트에 담음.
-        for(int i=0; i<size; i++){
+        for (int i = 0; i < size; i++) {
             Object obj = redisTemplate.opsForList().leftPop(BUFFER_KEY);
-            if(obj instanceof MessageDTO){
+            if (obj instanceof MessageDTO) { // Object 타입으로 Pop하기 때문에 instanceof로 확인 후 형변환.
                 batchList.add((MessageDTO) obj);
             }
         }
 
         // 모아둔 채팅이 있다면 DB에 한번에 저장
-        if(!batchList.isEmpty()) {
+        if (!batchList.isEmpty()) {
             chatMapper.insertMessageBatch(batchList);
             log.info("[Batch] {} 개의 채팅을 DB에 일괄 저장했습니다.", batchList.size());
         }
@@ -53,7 +53,7 @@ public class ChatBatchScheduler {
 
     // 갑작스러운 서버 다운 방어 로직
     @PreDestroy
-    public void onShutdown(){
+    public void onShutdown() {
         log.warn("[서버 종료 감지] Redis 잔여 채팅 백업을 시작합니다.");
         processChatBuffer();
 
