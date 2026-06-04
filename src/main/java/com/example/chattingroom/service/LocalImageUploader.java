@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.List;
 import java.util.UUID;
 
 @Slf4j
@@ -22,9 +23,9 @@ public class LocalImageUploader implements ImageUploader {
     public String upload(MultipartFile file) {
         try {
 
-            // 이미지 파일 확장자 검증
+            // MIME 타입 검증 과정 - 이미지 파일 확장자 검증, but 클라이언트가 보낸 정보는 조작가능하므로 단독으로 신뢰해서는 안된다.
             String contentType = file.getContentType();
-            if(contentType == null || !contentType.startsWith("image/") {
+            if (contentType == null || !contentType.contains("image")) {
                 throw new BusinessException("이미지 파일만 업로드 가능", ErrorCode.INVALID_FILE_FORMAT);
             }
 
