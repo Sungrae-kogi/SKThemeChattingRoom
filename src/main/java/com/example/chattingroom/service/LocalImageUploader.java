@@ -21,6 +21,13 @@ public class LocalImageUploader implements ImageUploader {
     @Override
     public String upload(MultipartFile file) {
         try {
+
+            // 이미지 파일 확장자 검증
+            String contentType = file.getContentType();
+            if(contentType == null || !contentType.startsWith("image/") {
+                throw new BusinessException("이미지 파일만 업로드 가능", ErrorCode.INVALID_FILE_FORMAT);
+            }
+
             File dir = new File(uploadDir); // 디렉토리 참조객체
             if (!dir.exists()) { // 디렉토리가 없다?
                 if (!dir.mkdirs()) { // 그럼만들어 -> 그런데 만들지 못했다?
