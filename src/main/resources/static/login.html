@@ -1,0 +1,198 @@
+<!DOCTYPE html>
+<html lang="ko">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SK Theme - 로그인</title>
+    <!-- Google Fonts Outfit & Noto Sans KR -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link
+        href="https://fonts.googleapis.com/css2?family=Noto+Sans+KR:wght@300;400;500;700&family=Outfit:wght@400;600;800&display=swap"
+        rel="stylesheet">
+    <style>
+        :root {
+            --bg-color: #0b0b0f;
+            --card-bg: rgba(255, 255, 255, 0.03);
+            --border-color: rgba(255, 255, 255, 0.07);
+            --text-primary: #ffffff;
+            --text-secondary: #a0a0ab;
+            --primary-gradient: linear-gradient(135deg, #e50914 0%, #ff5e3a 100%);
+            --glow-color: rgba(229, 9, 20, 0.25);
+        }
+
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: 'Outfit', 'Noto Sans KR', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            overflow: hidden;
+            position: relative;
+        }
+
+        /* 고급스러운 그라데이션 배경 장식 */
+        body::before {
+            content: '';
+            position: absolute;
+            width: 400px;
+            height: 400px;
+            background: radial-gradient(circle, var(--glow-color) 0%, rgba(0, 0, 0, 0) 70%);
+            top: -100px;
+            right: -100px;
+            z-index: 0;
+            filter: blur(50px);
+        }
+
+        body::after {
+            content: '';
+            position: absolute;
+            width: 450px;
+            height: 450px;
+            background: radial-gradient(circle, rgba(255, 94, 58, 0.1) 0%, rgba(0, 0, 0, 0) 70%);
+            bottom: -150px;
+            left: -150px;
+            z-index: 0;
+            filter: blur(60px);
+        }
+
+        .container {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 400px;
+            padding: 40px 30px;
+            background: var(--card-bg);
+            border: 1px solid var(--border-color);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 24px;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), box-shadow 0.4s ease;
+        }
+
+        .brand-title {
+            font-size: 2rem;
+            font-weight: 800;
+            letter-spacing: -0.03em;
+            background: var(--primary-gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 24px;
+        }
+
+        .form-group {
+            margin-bottom: 20px;
+            text-align: left;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 8px;
+            font-size: 0.85rem;
+            color: var(--text-secondary);
+            font-weight: 500;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border-radius: 10px;
+            border: 1px solid var(--border-color);
+            background: rgba(255, 255, 255, 0.05);
+            color: var(--text-primary);
+            font-size: 1rem;
+            outline: none;
+            transition: border-color 0.3s, background 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #ff5e3a;
+            background: rgba(255, 255, 255, 0.08);
+        }
+
+        .login-btn {
+            display: block;
+            width: 100%;
+            padding: 16px;
+            font-size: 1.05rem;
+            font-weight: 600;
+            color: #ffffff;
+            border: none;
+            cursor: pointer;
+            background: var(--primary-gradient);
+            border-radius: 12px;
+            box-shadow: 0 4px 15px rgba(229, 9, 20, 0.3);
+            transition: all 0.3s ease;
+            margin-top: 10px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 25px rgba(229, 9, 20, 0.45);
+        }
+
+        .login-btn:active {
+            transform: translateY(1px);
+        }
+
+        .links {
+            margin-top: 24px;
+            font-size: 0.85rem;
+        }
+
+        .links a {
+            color: var(--text-secondary);
+            text-decoration: none;
+            transition: color 0.3s;
+        }
+
+        .links a:hover {
+            color: #ff5e3a;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+
+<body>
+    <div class="container">
+        <h1 class="brand-title">로그인</h1>
+        <form id="loginForm" action="/login" method="POST">
+            <div class="form-group">
+                <label for="username">아이디</label>
+                <input type="text" id="username" name="username" placeholder="아이디를 입력하세요" required autocomplete="off">
+            </div>
+            <div class="form-group">
+                <label for="password">비밀번호</label>
+                <input type="password" id="password" name="password" placeholder="비밀번호를 입력하세요" required>
+            </div>
+            <button type="submit" class="login-btn">로그인</button>
+        </form>
+        <div class="links">
+            <a href="/signup.html">아직 계정이 없으신가요? 회원가입</a>
+        </div>
+    </div>
+
+    <script>
+        // 로그인 실패 시 URL에 넘어오는 ?error 파라미터를 감지하여 경고창 띄우기
+        const urlParams = new URLSearchParams(window.location.search);
+        if (urlParams.has('error')) {
+            alert("아이디 또는 비밀번호가 잘못되었습니다.");
+            
+            // 경고창 확인 후 주소창에서 ?error 파라미터 깔끔하게 제거
+            window.history.replaceState({}, document.title, "/login.html");
+        }
+    </script>
+</body>
+
+</html>

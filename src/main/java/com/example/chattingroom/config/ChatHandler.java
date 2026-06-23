@@ -52,14 +52,10 @@ public class ChatHandler extends TextWebSocketHandler {
         log.info("[접속 성공] 세션 ID: {}",
                 session.getId());
 
-        // URL에서 닉네임 안전하게 추출 (?name=홍길동)
-        String query = session.getUri().getQuery();
+        // Spring Security의 Principal을 통해 인증된 사용자 아이디 추출
         String name = "익명";
-
-        if (query != null && query.contains("name=")) {
-            name = query.substring(
-                    query.indexOf("name=") + 5);
-            name = URLDecoder.decode(name, "UTF-8");
+        if (session.getPrincipal() != null) {
+            name = session.getPrincipal().getName();
         }
 
         // 명부에 세션과 닉네임 등록

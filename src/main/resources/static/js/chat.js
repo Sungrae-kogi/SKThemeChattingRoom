@@ -1,34 +1,17 @@
-// 1. 입장 시 익명 이름 설정창
-let username = "익명";
+// 1. 서버(JSP)에서 넘겨준 로그인 아이디를 전역 변수로 할당
+let username = typeof myUsername !== 'undefined' ? myUsername : "익명";
 let ws;
 let lastSendTime = 0;
 
-// 입장 로직
-document.getElementById("btnJoin").addEventListener("click", startChat);
-
-document.getElementById("nameInput").addEventListener("keyup", function (e) {
-    if (e.key === 'Enter')
-        startChat();
-});
-
-function startChat() {
-    let inputName = document.getElementById("nameInput").value.trim();
-
-    if (inputName !== "") {
-        username = inputName;
-    }
-
-    // 로그인 창 숨김, 채팅창 띄우기
-    document.getElementById("loginScreen").style.display = "none";
-    document.getElementById("chatScreen").style.display = "block";
-
+// 화면 로딩 완료 시 자동으로 채팅 접속
+document.addEventListener("DOMContentLoaded", function() {
     connectWebSocket();
 
     // ★ 추가된 부분: 화면이 나타난 직후 감시자 스위치 ON!
     if (window.startChatObserver) {
         window.startChatObserver();
     }
-}
+});
 
 // 이전 메시지의 날짜를 기억하고 있을 전역 변수
 let lastMessageDate = "";
@@ -101,7 +84,7 @@ function renderMessage(msgObj) {
 
 // 2. 서버의 "/chat" 주소로 웹소켓 연결
 function connectWebSocket() {
-    ws = new WebSocket("ws://" + location.host + "/chat?name=" + encodeURIComponent(username));
+    ws = new WebSocket("ws://" + location.host + "/chat");
 
     // 모듈화 리펙토링 부분. onmessage 함수안에 대량의 로직이 들어간 상황.
     ws.onmessage = function (event) {

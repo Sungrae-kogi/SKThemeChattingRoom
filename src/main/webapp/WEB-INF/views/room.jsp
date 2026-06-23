@@ -13,20 +13,8 @@
         </head>
 
         <body>
-            <div class="chat-wrap" id="loginScreen">
-                <div class="header">SK 사내 익명 톡</div>
-                <div class="login-box">
-                    <h3 style="color:var(--text-primary)">닉네임을 설정해주세요</h3>
 
-                    <input type="text" id="nameInput" placeholder="ex) : 홍길동" />
-                    <button class="btn-send" id="btnJoin" style="margin-top:10px; width: 100%; padding:12px;">
-                        입장하기
-                    </button>
-                </div>
-            </div>
-
-
-            <div class="chat-wrap" id="chatScreen" style="display: none;">
+            <div class="chat-wrap" id="chatScreen">
                 <div class="header">SK 사내 익명 톡</div>
                 <div id="userList" class="user-list">
                     접속자:
@@ -43,11 +31,12 @@
                         전송
                     </button>
                 </div>
-            </div>
-
-            <%--<script src="/js/chat.js"></script>--%>
-                <spring:url value="/js/chat.js" var="jsUrl" />
-                <script src="${jsUrl}"></script>
+            <script>
+                // 서버(ChatController)에서 넘겨준 로그인 아이디를 전역 변수로 저장
+                const myUsername = "${username}";
+            </script>
+            <spring:url value="/js/chat.js" var="jsUrl" />
+            <script src="${jsUrl}"></script>
 
                 <spring:url value="/js/chat-history.js" var="historyJsUrl" />
                 <script src="${historyJsUrl}"></script>

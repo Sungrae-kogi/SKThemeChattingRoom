@@ -3,6 +3,7 @@ package com.example.chattingroom.config;
 import com.example.chattingroom.dto.ErrorResponse;
 import com.example.chattingroom.enums.ErrorCode;
 import com.example.chattingroom.exception.BusinessException;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -49,7 +50,8 @@ public class GlobalExceptionHandler {
         return ErrorResponse.toResponseEntity(ErrorCode.INVALID_REQUEST);
     }
 
-    // 비즈니스 공통 예외 처리
+    // 추가해본 커스텀 예외 처리 부분, "비즈니스 오류" 라는 상위 오류 catch -> 어떤 비즈니스 로직이 터졌는지. "하위 오류" 내용
+    // 출력
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusinessException(BusinessException exception) {
         log.warn("비즈니스 오류 발생: {}", exception.getMessage());
@@ -57,7 +59,7 @@ public class GlobalExceptionHandler {
         return ErrorResponse.toResponseEntity(exception.getErrorCode());
     }
 
-    // 깔때기구조, 세세한 범위 of 오류를 잡다가 마지막에는 큰 범위로.
+    // 깔때기구조, 세세한 범위의 오류를 잡다가 마지막에는 큰 범위로.
     @ExceptionHandler(Exception.class)
     public ResponseEntity<ErrorResponse> handleAllException(Exception exception) {
         log.error("서버 내부 오류 발생: ", exception);

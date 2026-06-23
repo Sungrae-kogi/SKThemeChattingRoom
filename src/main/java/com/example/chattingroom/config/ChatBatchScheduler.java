@@ -23,8 +23,8 @@ public class ChatBatchScheduler {
 
     private static final String BUFFER_KEY = "chat:buffer";
 
-    // 20초 마다 실행
-    @Scheduled(fixedDelay = 20000)
+    // 3초 마다 실행
+    @Scheduled(fixedDelay = 3000)
     @Transactional
     public void processChatBuffer() {
         // 버퍼의 채팅 수를 확인
